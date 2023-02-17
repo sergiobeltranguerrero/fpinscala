@@ -177,6 +177,9 @@ object PolymorphicFunctions:
       else go(pos - 1, gt(as(pos - 2), as(pos - 1)))
     go(as.length, true)
 
+  def isSortedCombinators[A](as: Array[A], gt: (A, A) => Boolean): Boolean =
+    (0 to as.length - 2).forall(i => gt(as(i), as(i + 1)))
+
   // Polymorphic functions are often so constrained by their type
   // that they only have one implementation! Here's an example:
 
