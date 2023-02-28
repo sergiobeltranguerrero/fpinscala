@@ -152,23 +152,43 @@ object List: // `List` companion object. Contains functions for creating and wor
   def foldRightViaFoldLeft[A, B](as: List[A], acc: B, f: (A, B) => B): B =
     foldLeft(reverse(as), acc, (b, a) => f(a, b))
 
-  def appendViaFoldRight[A](l: List[A], r: List[A]): List[A] = ???
+  def appendViaFoldRight[A](l: List[A], r: List[A]): List[A] =
+    foldRight(l, r, Cons(_, _))
+    // foldRight(l, r, (a: A, l: List[A]) => Cons(a, l))
 
-  def concat[A](l: List[List[A]]): List[A] = ???
+  def concat[A](l: List[List[A]]): List[A] =
+    foldRight(l, List[A](), append)
 
-  def incrementEach(l: List[Int]): List[Int] = ???
+  def incrementEach(l: List[Int]): List[Int] = l match
+    case Nil         => Nil
+    case Cons(x, xs) => Cons(x + 1, incrementEach(xs))
 
-  def doubleToString(l: List[Double]): List[String] = ???
+  def incrementEachViaFoldRight(l: List[Int]): List[Int] =
+    // r es la llista de Ints ja incrementada.
+    foldRight(l, List[Int](), (a, r) => Cons(a + 1, r))
 
-  def map[A, B](l: List[A], f: A => B): List[B] = ???
+  def doubleToString(l: List[Double]): List[String] =
+    foldRight(l, List[String](), (a, r) => Cons(a.toString(), r))
 
-  def filter[A](as: List[A], f: A => Boolean): List[A] = ???
+  def map[A, B](l: List[A], f: A => B): List[B] = l match
+    case Nil         => Nil
+    case Cons(x, xs) => Cons(f(x), map(xs, f))
 
-  def flatMap[A, B](as: List[A], f: A => List[B]): List[B] = ???
+    // foldRight(l, List[B](), (a, r) => Cons(f(a), r))
 
-  def filterViaFlatMap[A](as: List[A], f: A => Boolean): List[A] = ???
+  def filter[A](as: List[A], f: A => Boolean): List[A] =
+    foldRight(as, List[A](), (a, r) => if f(a) then Cons(a, r) else r)
 
-  def addPairwise(a: List[Int], b: List[Int]): List[Int] = ???
+  def flatMap[A, B](as: List[A], f: A => List[B]): List[B] =
+    foldRight(as, List[B](), (a, r) => append(f(a), r))
+    // concat(map(as, f))
+
+  def filterViaFlatMap[A](as: List[A], f: A => Boolean): List[A] =
+    flatMap(as, a => if f(a) then List(a) else List()) // f: A => List[A]
+
+  def addPairwise(a: List[Int], b: List[Int]): List[Int] = (a, b) match
+    case (Cons(x, xs), Cons(y, ys)) => Cons(x + y, addPairwise(xs, ys))
+    case (_, _)                     => Nil
 
   // def zipWith - TODO determine signature
 
