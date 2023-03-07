@@ -76,8 +76,48 @@ object Option:
       mean(ts)
     }
 
-  def map2[A, B, C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] = ???
+  def map2[A, B, C](oa: Option[A], ob: Option[B])(f: (A, B) => C): Option[C] =
+    (oa, ob) match
+      case (Some(a), Some(b)) => Some(f(a, b))
+      case _                  => None
 
-  def sequence[A](as: List[Option[A]]): Option[List[A]] = ???
+  def insuranceRateQuote(age: Int, numberOfSpeedingTickets: Int): Double = ???
 
-  def traverse[A, B](as: List[A])(f: A => Option[B]): Option[List[B]] = ???
+  def parseInsuranceRateQuote(
+      age: String,
+      numberOfSpeedingTickets: String
+  ): Option[Double] =
+    // val optAge: Int = Integer.parseInt(age)
+    // val optTickets: Int = Integer.parseInt(numberOfSpeedingTickets)
+    // insuranceRateQuote(age, tickets)
+    val optAge: Option[Int] = ???
+    val optTickets: Option[Int] = ???
+    // optAge.flatMap { age =>
+    //   optTickets.map { tickets =>
+    //     insuranceRateQuote(age, tickets)
+    //   }
+    // }
+    for
+      age <- optAge
+      tickets <- optTickets
+    yield insuranceRateQuote(age, tickets)
+
+  def sequence[A](as: List[Option[A]]): Option[List[A]] = as match
+    case Nil       => Some(Nil)
+    case oa :: oas => map2(oa, sequence(oas))(_ :: _)
+    // for
+    //   a <- oa
+    //   as <- sequence(oas)
+    // yield a :: as
+
+    // oa: Option[A]
+    // oas: List[Option[A]] ----> Option[List[A]]
+    // ---> Option[List[A]]
+    // ----------> List[A]
+    // -------------------> Nil
+    // -------------------> a: A as: List[A]  ----> a :: as
+
+//def map     [A, B](as: List[A])(f: A =>        B) : List[B]
+  def traverse[A, B](as: List[A])(f: A => Option[B]): Option[List[B]] = as match
+    case Nil     => Some(Nil)
+    case a :: as => map2(f(a), traverse(as)(f))(_ :: _)
