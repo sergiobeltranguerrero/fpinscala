@@ -3,7 +3,6 @@ package fpinscala.exercises.errorhandling
 // Hide std library `Either` since we are writing our own in this chapter
 import scala.{Either as _, Left as _, Right as _}
 import scala.util.control.NonFatal
-import fpinscala.answers.applicative.Traverse.Iteration.a
 
 enum Either[+E, +A]:
   case Left(get: E)
