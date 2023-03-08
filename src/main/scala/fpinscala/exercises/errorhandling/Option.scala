@@ -117,7 +117,21 @@ object Option:
     // -------------------> Nil
     // -------------------> a: A as: List[A]  ----> a :: as
 
+  def sequence2[A](as: List[Option[A]]): Option[List[A]] =
+    as.foldRight(Some(List.empty[A])) { (oa, acc) =>
+      map2(oa, acc)(_ :: _)
+    // for
+    //   a <- oa
+    //   as <- acc
+    // yield (a :: as)
+    }
+
 //def map     [A, B](as: List[A])(f: A =>        B) : List[B]
   def traverse[A, B](as: List[A])(f: A => Option[B]): Option[List[B]] = as match
     case Nil     => Some(Nil)
     case a :: as => map2(f(a), traverse(as)(f))(_ :: _)
+
+  def traverse2[A, B](as: List[A])(f: A => Option[B]): Option[List[B]] =
+    as.foldRight(Some(List.empty[B])) { (a, acc) =>
+      map2(f(a), acc)(_ :: _)
+    }
