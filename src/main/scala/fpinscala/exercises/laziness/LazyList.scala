@@ -4,7 +4,11 @@ enum LazyList[+A]:
   case Empty
   case Cons(h: () => A, t: () => LazyList[A])
 
-  def toList: List[A] = ???
+  import LazyList.*
+
+  def toList: List[A] = this match
+    case Empty      => Nil
+    case Cons(h, t) => h() :: t().toList
 
   // The arrow `=>` in front of an argument type means that the function `f` takes this argument by name
   // and may choose not to evaluate it.
@@ -27,15 +31,23 @@ enum LazyList[+A]:
     case Empty      => None
     case Cons(h, t) => if (f(h())) Some(h()) else t().find(f)
 
-  def take(n: Int): LazyList[A] = ???
+  def take(n: Int): LazyList[A] = this match
+    case Cons(h, t) if n > 0 => cons(h(), t().take(n - 1))
+    case _                   => empty
 
-  def drop(n: Int): LazyList[A] = ???
+  def drop(n: Int): LazyList[A] = this match
+    case Cons(_, t) if n > 0 => t().drop(n - 1)
+    case _                   => this
 
-  def takeWhile(p: A => Boolean): LazyList[A] = ???
+  def takeWhile(p: A => Boolean): LazyList[A] = this match
+    case Cons(h, t) if p(h()) => cons(h(), t().takeWhile(p))
+    case _                    => empty
 
   def forAll(p: A => Boolean): Boolean = ???
 
-  def headOption: Option[A] = ???
+  def headOption: Option[A] = this match
+    case Empty      => None
+    case Cons(h, t) => Some(h())
 
   // 5.7 map, filter, append, flatmap using foldRight. Part of the exercise is
   // writing your own function signatures.
