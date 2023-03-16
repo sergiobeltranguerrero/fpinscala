@@ -44,3 +44,5 @@ val result = longNew.drop(2).take(2)
 
 // avaluation
 result.toList.length
+
+LazyList.fibsViaUnfold.take(10).toList

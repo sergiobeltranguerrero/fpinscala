@@ -85,6 +85,28 @@ enum LazyList[+A]:
       f(a).append(r)
     }
 
+  def zipAll[B](that: LazyList[B]): LazyList[(Option[A], Option[B])] =
+    (this, that) match
+      case (Cons(a, as), Cons(b, bs)) =>
+        cons((Some(a()), Some(b())), as().zipAll(bs()))
+      case (Cons(a, as), Empty) => cons((Some(a()), None), as().zipAll(that))
+      case (Empty, Cons(b, bs)) => cons((None, Some(b())), this.zipAll(bs()))
+      case (Empty, Empty)       => empty
+
+  def zipWith[B, C](that: LazyList[B])(f: (A, B) => C): LazyList[C] = ???
+
+  def zip[B](that: LazyList[B]): LazyList[(A, B)] = (this, that) match
+    case (Cons(a, as), Cons(b, bs)) => cons((a(), b()), as().zip(bs()))
+    case _                          => empty
+
+  def zipWithAll[B, C](that: LazyList[B])(
+      f: (Option[A], Option[B]) => C
+  ): LazyList[C] = ???
+
+  def zipAllViaZipWithAll[B](
+      s2: LazyList[B]
+  ): LazyList[(Option[A], Option[B])] = ???
+
   def startsWith[B](s: LazyList[B]): Boolean = ???
 
 object LazyList:
@@ -101,18 +123,41 @@ object LazyList:
 
   val ones: LazyList[Int] = LazyList.cons(1, ones)
 
-  def continually[A](a: A): LazyList[A] = ???
+  def continually[A](a: A): LazyList[A] = LazyList.cons(a, continually(a))
 
-  def from(n: Int): LazyList[Int] = ???
+  def from(n: Int): LazyList[Int] = LazyList.cons(n, from(n + 1))
 
   lazy val fibs: LazyList[Int] = ???
 
-  def unfold[A, S](state: S)(f: S => Option[(A, S)]): LazyList[A] = ???
+  def unfold[A, S](state: S)(f: S => Option[(A, S)]): LazyList[A] =
+    f(state) match
+      case None => empty
+      // s es nextState
+      case Some((a, s)) => cons(a, unfold(s)(f))
 
-  lazy val fibsViaUnfold: LazyList[Int] = ???
+  def unfoldViaMap[A, S](state: S)(f: S => Option[(A, S)]): LazyList[A] = ???
 
-  def fromViaUnfold(n: Int): LazyList[Int] = ???
+  def unfoldViaFold[A, S](state: S)(f: S => Option[(A, S)]): LazyList[A] = ???
 
-  def continuallyViaUnfold[A](a: A): LazyList[A] = ???
+  // f_0 = 0
+  // f_1 = 1
+  // f_n = f_(n-1) + f_(n-2)
+
+  // a = 0
+  // b = 1
+  // i = 0
+  // while true do
+  //   a, b = b, a + b
+  // a es el i-ésimo número de fibonacci
+
+  lazy val fibsViaUnfold: LazyList[Int] =
+    unfold((0, 1)) { case (a, b) => Some((a, (b, a + b))) }
+
+  def fromViaUnfold(n: Int): LazyList[Int] =
+    unfold(n) { s => Some((s, s + 1)) }
+
+  def continuallyViaUnfold[A](a: A): LazyList[A] =
+    // () Es de tipo Unit
+    unfold(()) { _ => Some((a, ())) }
 
   lazy val onesViaUnfold: LazyList[Int] = ???
